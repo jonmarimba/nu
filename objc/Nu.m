@@ -462,12 +462,18 @@ id _nucell(id car, id cdr)
 
 id _nuregex(const unsigned char *pattern, int options)
 {
-    return [NSRegularExpression regexWithPattern:_nustring(pattern) options:options];
+    NSString *ptn = _nustring(pattern);
+    NSRegularExpression *regex = [NSRegularExpression regexWithPattern:ptn options:options];
+    NSLog(@"_nuregex Pattern=%@, regex = %@", pattern, regex);
+    return regex;
 }
 
 id _nuregex_with_length(const unsigned char *pattern, int length, int options)
 {
-    return [NSRegularExpression regexWithPattern:_nustring_with_length(pattern, length) options:options];
+    NSString *ptn = _nustring_with_length(pattern, length);
+    NSRegularExpression *regex = [NSRegularExpression regexWithPattern:ptn options:options];
+    NSLog(@"_nuregex_with_length Pattern=%@, regex = %@", pattern, regex);
+    return regex;
 }
 
 id _nulist(id firstObject, ...)
@@ -6304,12 +6310,24 @@ static void nu_markEndOfObjCTypeString(char *type, size_t len)
         id wrappedClass = [((NuClass *) self) wrappedClass];
         m = class_getClassMethod(wrappedClass, sel);
         if (m)
+        {
             target = wrappedClass;
+        }
         else
+        {
             m = class_getInstanceMethod(object_getClass(self), sel);
+//            if (m)
+//            {
+//                NSLog(@"found an instance method for %@ in %@", NSStringFromSelector(sel), self);
+//            }
+        }
     }
     else {
         m = class_getInstanceMethod(object_getClass(self), sel);
+//        if (m)
+//        {
+//            NSLog(@"found an instance method for %@ in %@", NSStringFromSelector(sel), self);
+//        }
         if (!m) m = class_getClassMethod(object_getClass(self), sel);
     }
     id result = Nu__null;
@@ -6353,9 +6371,9 @@ static void nu_markEndOfObjCTypeString(char *type, size_t len)
         }
         // Otherwise, call the overridable handler for unknown messages.
         else {
-            //NSLog(@"calling handle unknown message for %@", [cdr stringValue]);
+            NSLog(@"calling handle unknown message for %@", [cdr stringValue]);
             result = [self handleUnknownMessage:cdr withContext:context];
-            //NSLog(@"result is %@", result);
+            NSLog(@"result is %@", result);
         }
     }
     
@@ -6378,7 +6396,6 @@ static void nu_markEndOfObjCTypeString(char *type, size_t len)
      [cdr stringValue]];
     return Nu__null;
 }
-
 
 - (id) handleUnknownMessage:(id) message withContext:(NSMutableDictionary *) context
 {
@@ -9198,11 +9215,18 @@ static id regexWithString(NSString *string)
             }
         }
         NSString *pattern = [string substringWithRange:NSMakeRange(1, lastSlash-1)];
-        return [NSRegularExpression regularExpressionWithPattern:pattern
-                                                         options:options
-                                                           error:NULL];
+        NSError *err = nil;
+        NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:pattern
+                                                                               options:options
+                                                                                 error:&err];
+        if (!regex && err)
+        {
+            NSLog(@"regexWithString(%@) returning %@ (%@)", string, regex, [err localizedDescription]);
+        }
+        return regex;
     }
     else {
+        NSLog(@"regexWithString(%@) returning nil", string);
         return nil;
     }
 }

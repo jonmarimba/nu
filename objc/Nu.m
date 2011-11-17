@@ -6372,9 +6372,9 @@ static void nu_markEndOfObjCTypeString(char *type, size_t len)
         }
         // Otherwise, call the overridable handler for unknown messages.
         else {
-            NSLog(@"calling handle unknown message for %@", [cdr stringValue]);
+//            NSLog(@"calling handle unknown message for %@ target %@ %@ %@", self, target, NSStringFromSelector(sel), [cdr stringValue]);
             result = [self handleUnknownMessage:cdr withContext:context];
-            NSLog(@"result is %@", result);
+//            NSLog(@"result is %@", result);
         }
     }
     
@@ -6691,6 +6691,7 @@ static void nu_markEndOfObjCTypeString(char *type, size_t len)
 
 + (BOOL) include:(NuClass *)prototypeClass
 {
+    //NSLog(@"%@ %@ %@", [self class], NSStringFromSelector(_cmd), prototypeClass);
     NSArray *methods = [prototypeClass instanceMethods];
     NSEnumerator *enumerator = [methods objectEnumerator];
     id method;
@@ -9187,6 +9188,7 @@ static id atomWithString(NSString *string, NuSymbolTable *symbolTable)
     return symbol;
 }
 
+id regexWithString(NSString *string);
 id regexWithString(NSString *string)
 {
     // If the first character of the string is a forward slash, it's a regular expression literal.

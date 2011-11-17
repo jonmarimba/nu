@@ -31,6 +31,7 @@ END)
 
 ;; source files
 (set @c_files     (filelist "^objc/.*\.c$"))
+(@c_files unionSet:(filelist "^pcre/.*\.c$"))
 (set @m_files     (filelist "^objc/.*\.m$"))
 (@m_files unionSet:(filelist "^baked/.*\.m$"))
 (set @nu_files    (filelist "^nu/.*\.nu$"))
@@ -46,6 +47,7 @@ END)
 (@inc_dirs addObjectsFromList:(list "./include" "./include/Nu"))
 (ifDarwin
          (then (@frameworks addObject:"Cocoa")
+               (@inc_dirs   addObject:"./pcre")
                (@libs       addObject:"edit"))
          (else (@libs       addObjectsFromList:(list "readline" "m" ))
                ;;(@inc_dirs   addObject:"/usr/include/GNUstep/Headers")
@@ -66,6 +68,13 @@ END)
                    (else ;; Use the libffi that is distributed with Nu.
                          (@inc_dirs addObject:"./libffi/include")
                          (@lib_dirs addObject:"./libffi")))))
+
+(set @pcre_prefix "")
+(let ((pcre_config ((NSString stringWithShellCommand:"which pcre-config 2>/dev/null") chomp)))
+     (if pcre_config
+         (then (set @pcre_prefix ((NSString stringWithShellCommand:"#{pcre_config} --prefix") chomp))
+               (@inc_dirs addObject:"#{@pcre_prefix}/include")
+               (@lib_dirs addObject:"#{@pcre_prefix}/lib"))))
 
 ;; framework description
 (set @framework "Nu")
